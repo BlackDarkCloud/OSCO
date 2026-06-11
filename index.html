@@ -152,7 +152,11 @@
                 </select>
               </label>
               <label>Sizes <input id="productSizes" placeholder="S, M, L, XL" /></label>
-              <label>Image URL <input id="productImage" placeholder="https://..." /></label>
+              <label>Product image <input id="productImageFile" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+              <label>Image URL <input id="productImage" placeholder="Optional hosted image URL" /></label>
+              <div class="image-preview hidden" id="productImagePreview">
+                <img src="" alt="" />
+              </div>
               <label>Sort order <input id="productSort" type="number" value="0" /></label>
               <label>Description <textarea id="productDescription" rows="3"></textarea></label>
               <label class="check-row"><input id="productActive" type="checkbox" checked /> Active</label>

@@ -209,6 +209,45 @@ create index if not exists banners_placement_active_idx on public.banners(placem
 create index if not exists orders_user_created_idx on public.orders(user_id, created_at desc);
 create index if not exists order_items_order_idx on public.order_items(order_id);
 
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'product-images',
+  'product-images',
+  true,
+  5242880,
+  array['image/png', 'image/jpeg', 'image/webp']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "public read product images" on storage.objects;
+create policy "public read product images"
+on storage.objects
+for select
+using (bucket_id = 'product-images');
+
+drop policy if exists "staff upload product images" on storage.objects;
+create policy "staff upload product images"
+on storage.objects
+for insert
+with check (bucket_id = 'product-images' and public.is_shop_admin());
+
+drop policy if exists "staff update product images" on storage.objects;
+create policy "staff update product images"
+on storage.objects
+for update
+using (bucket_id = 'product-images' and public.is_shop_admin())
+with check (bucket_id = 'product-images' and public.is_shop_admin());
+
+drop policy if exists "staff delete product images" on storage.objects;
+create policy "staff delete product images"
+on storage.objects
+for delete
+using (bucket_id = 'product-images' and public.is_shop_admin());
+
 grant usage on schema public to anon, authenticated;
 grant select on public.products to anon, authenticated;
 grant select on public.banners to anon, authenticated;

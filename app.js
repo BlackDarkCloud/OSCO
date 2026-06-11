@@ -498,31 +498,62 @@ function renderAdminOrders() {
 async function saveProduct(event) {
   event.preventDefault();
   const id = document.querySelector("#productId").value;
-  const product = {
-    name: document.querySelector("#productName").value.trim(),
-    price_ghs: Number(document.querySelector("#productPrice").value),
-    section: document.querySelector("#productSection").value,
-    sizes: parseSizes(document.querySelector("#productSizes").value),
-    image_url: document.querySelector("#productImage").value.trim() || null,
-    description: document.querySelector("#productDescription").value.trim(),
-    active: document.querySelector("#productActive").checked,
-    sort_order: Number(document.querySelector("#productSort").value || 0),
-  };
+  setAdminMessage("Saving product...");
+  try {
+    const imageUrl = await resolveProductImageUrl(id);
+    const product = {
+      name: document.querySelector("#productName").value.trim(),
+      price_ghs: Number(document.querySelector("#productPrice").value),
+      section: document.querySelector("#productSection").value,
+      sizes: parseSizes(document.querySelector("#productSizes").value),
+      image_url: imageUrl,
+      description: document.querySelector("#productDescription").value.trim(),
+      active: document.querySelector("#productActive").checked,
+      sort_order: Number(document.querySelector("#productSort").value || 0),
+    };
 
-  const query = id
-    ? supabaseClient.from("products").update(product).eq("id", id)
-    : supabaseClient.from("products").insert(product);
-  const { error } = await query;
+    const query = id
+      ? supabaseClient.from("products").update(product).eq("id", id)
+      : supabaseClient.from("products").insert(product);
+    const { error } = await query;
 
-  if (error) {
-    setAdminMessage(error.message);
-    return;
+    if (error) {
+      setAdminMessage(error.message);
+      return;
+    }
+
+    setAdminMessage("Product saved.");
+    resetProductForm();
+    await loadProducts();
+    renderAll();
+  } catch (error) {
+    setAdminMessage(error.message || "Unable to save product.");
+  }
+}
+
+async function resolveProductImageUrl(productId) {
+  const fileInput = document.querySelector("#productImageFile");
+  const pastedUrl = document.querySelector("#productImage").value.trim();
+  const file = fileInput.files?.[0];
+  if (!file) return pastedUrl || null;
+
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Choose a valid image file.");
   }
 
-  setAdminMessage("Product saved.");
-  resetProductForm();
-  await loadProducts();
-  renderAll();
+  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const safeExtension = extension.replace(/[^a-z0-9]/g, "") || "jpg";
+  const fileName = `${productId || crypto.randomUUID()}-${Date.now()}.${safeExtension}`;
+  const filePath = `products/${fileName}`;
+  const { error } = await supabaseClient.storage.from("product-images").upload(filePath, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
+
+  if (error) throw error;
+
+  const { data } = supabaseClient.storage.from("product-images").getPublicUrl(filePath);
+  return data.publicUrl;
 }
 
 function editProduct(id) {
@@ -534,6 +565,7 @@ function editProduct(id) {
   document.querySelector("#productSection").value = product.section;
   document.querySelector("#productSizes").value = formatSizes(product.sizes);
   document.querySelector("#productImage").value = product.image_url || "";
+  renderProductImagePreview(product.image_url);
   document.querySelector("#productDescription").value = product.description || "";
   document.querySelector("#productActive").checked = product.active;
   document.querySelector("#productSort").value = product.sort_order || 0;
@@ -556,6 +588,23 @@ function resetProductForm() {
   document.querySelector("#productForm").reset();
   document.querySelector("#productId").value = "";
   document.querySelector("#productActive").checked = true;
+  renderProductImagePreview("");
+}
+
+function renderProductImagePreview(url) {
+  const preview = document.querySelector("#productImagePreview");
+  const image = preview.querySelector("img");
+  image.src = url || "";
+  preview.classList.toggle("hidden", !url);
+}
+
+function previewSelectedProductImage() {
+  const file = document.querySelector("#productImageFile").files?.[0];
+  if (!file) {
+    renderProductImagePreview(document.querySelector("#productImage").value.trim());
+    return;
+  }
+  renderProductImagePreview(URL.createObjectURL(file));
 }
 
 async function saveBanner(event) {
@@ -644,6 +693,12 @@ function bindEvents() {
   document.querySelector("#signOut").addEventListener("click", signOut);
   document.querySelector("#productForm").addEventListener("submit", saveProduct);
   document.querySelector("#productReset").addEventListener("click", resetProductForm);
+  document.querySelector("#productImageFile").addEventListener("change", previewSelectedProductImage);
+  document.querySelector("#productImage").addEventListener("input", () => {
+    if (!document.querySelector("#productImageFile").files?.length) {
+      renderProductImagePreview(document.querySelector("#productImage").value.trim());
+    }
+  });
   document.querySelector("#bannerForm").addEventListener("submit", saveBanner);
   document.querySelector("#bannerReset").addEventListener("click", resetBannerForm);
   document.querySelector("#adminLock").addEventListener("click", lockAdmin);

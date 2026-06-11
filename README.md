@@ -8,6 +8,7 @@ Professional Netlify storefront for the Ghana clothing brand using Supabase for 
 - Real catalog data from Supabase
 - Customer account required before checkout
 - Admin console controlled by Supabase `profiles.role`
+- Product image upload through Supabase Storage
 - Paystack checkout initialized by a Netlify Function
 - Paystack webhook endpoint for marking successful payments as paid
 - Email/order update webhook function
@@ -26,6 +27,26 @@ where id = 'USER_ID_FROM_AUTH_USERS';
 ```
 
 5. Add real products, banners and notifications through the owner console.
+
+## Database password
+
+You cannot view the existing database password after setup. If you do not know it, reset it in Supabase:
+
+1. Go to `Project Settings`.
+2. Open `Database`.
+3. Use the database password reset option.
+
+The website does not need this password. The frontend uses the public Supabase URL and anon key, while Netlify Functions use `SUPABASE_SERVICE_ROLE_KEY`.
+
+## Product image upload
+
+The schema creates a public Supabase Storage bucket named:
+
+```text
+product-images
+```
+
+Staff/admin users can upload product images directly from the product form. Customers can view uploaded product images publicly.
 
 ## Frontend config
 
