@@ -3,51 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="OSCO Ghana clothing shop. Power From Beyond, est. 2022."
-    />
+    <meta name="description" content="OSCO streetwear from Ghana. Power From Beyond." />
     <title>OSCO | Power From Beyond</title>
     <link rel="icon" href="assets/osco-logo-mark.png" />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <script src="https://js.paystack.co/v1/inline.js" defer></script>
     <script src="config.js" defer></script>
     <script src="app.js" defer></script>
   </head>
-  <body>
+  <body data-page="shop">
     <div class="notice-bar" id="noticeBar"></div>
-    <div class="notice-bar setup-bar" id="siteStatus"></div>
 
     <header class="site-header">
-      <a href="#shop" class="brand" aria-label="Home">
+      <a href="#top" class="brand" aria-label="OSCO home">
         <img src="assets/osco-logo-mark.png" alt="" />
       </a>
       <nav class="main-nav" aria-label="Main navigation">
         <a href="#new-arrivals">New</a>
         <a href="#flash-sale">Flashsale</a>
         <a href="#trending">Trending</a>
-        <a href="#account">Account</a>
-        <a href="#socials">Socials</a>
+        <a href="#story">Story</a>
       </nav>
-      <button class="cart-toggle" id="cartToggle" type="button">
-        Cart <span id="cartCount">0</span>
-      </button>
+      <div class="header-actions">
+        <button class="ghost-button" id="accountOpen" type="button">Account</button>
+        <button class="cart-toggle" id="cartToggle" type="button">Cart <span id="cartCount">0</span></button>
+      </div>
     </header>
 
-    <main id="shop">
-      <section class="hero">
+    <main id="top">
+      <section class="hero street-hero">
         <div class="hero-copy">
-          <p class="eyebrow">Ghana clothing brand</p>
-          <img class="hero-wordmark" src="assets/osco-logo-full.jpeg" alt="Power From Beyond" />
-          <p class="tagline">Black and white pieces from Ghana for everyday presence, movement and edge.</p>
+          <p class="eyebrow">Ghana streetwear</p>
+          <img class="hero-wordmark" src="assets/osco-logo-full.jpeg" alt="OSCO Power From Beyond" />
+          <p class="tagline">Black and white pieces built for Accra nights, daily movement, and the quiet confidence of standing apart.</p>
           <div class="hero-actions">
-            <a class="primary-link" href="#new-arrivals">Shop new arrivals</a>
-            <a class="secondary-link" href="#account">Sign in</a>
+            <a class="primary-link" href="#new-arrivals">Shop the drop</a>
+            <a class="secondary-link" href="#story">Power From Beyond</a>
           </div>
         </div>
-        <div class="hero-media" aria-label="OSCO brand logo">
-          <img src="assets/osco-logo-full.jpeg" alt="OSCO Power From Beyond logo" />
+        <div class="hero-poster">
+          <div class="poster-frame">
+            <img src="assets/osco-logo-full.jpeg" alt="" />
+          </div>
         </div>
       </section>
 
@@ -63,7 +60,7 @@
 
       <section class="shop-section dark-section" id="flash-sale">
         <div class="section-heading">
-          <p class="eyebrow">Limited drops</p>
+          <p class="eyebrow">Limited pieces</p>
           <h2>Flashsale</h2>
         </div>
         <div class="product-grid" data-section="flash-sale"></div>
@@ -71,44 +68,27 @@
 
       <section class="shop-section" id="trending">
         <div class="section-heading">
-          <p class="eyebrow">Most requested</p>
+          <p class="eyebrow">Most wanted</p>
           <h2>Trending</h2>
         </div>
         <div class="product-grid" data-section="trending"></div>
       </section>
 
-      <section class="account-section" id="account">
-        <div class="account-copy">
-          <p class="eyebrow">Customer account</p>
-          <h2>Sign in before checkout</h2>
-          <p class="helper">Create an account to place orders, save delivery details and receive updates.</p>
+      <section class="story-section" id="story">
+        <div>
+          <p class="eyebrow">Est. 2022</p>
+          <h2>Power From Beyond</h2>
         </div>
-
-        <div class="account-card" id="signedOut">
-          <form id="authForm" class="admin-form compact-form">
-            <label>Full name <input id="authName" autocomplete="name" /></label>
-            <label>Phone <input id="authPhone" autocomplete="tel" /></label>
-            <label>Email <input id="authEmail" type="email" autocomplete="email" required /></label>
-            <label>Password <input id="authPassword" type="password" autocomplete="current-password" required /></label>
-            <div class="form-actions">
-              <button id="authSignIn" type="submit">Sign in</button>
-              <button class="ghost-button" id="authSignUp" type="button">Create account</button>
-            </div>
-            <p class="helper" id="authMessage"></p>
-          </form>
-        </div>
-
-        <div class="account-card hidden" id="signedIn">
-          <p class="eyebrow">Signed in</p>
-          <h3 id="accountName"></h3>
-          <button class="ghost-button" id="signOut" type="button">Sign out</button>
-        </div>
+        <p>
+          OSCO is a Ghana-based streetwear label shaped by contrast, discipline and presence.
+          The brand keeps the palette sharp so the attitude can speak louder than the noise.
+        </p>
       </section>
 
       <section class="social-section" id="socials">
         <div>
-          <p class="eyebrow">Connect</p>
-          <h2>Follow the movement</h2>
+          <p class="eyebrow">Follow the movement</p>
+          <h2>Socials</h2>
         </div>
         <div class="social-links">
           <a href="https://instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
@@ -116,115 +96,33 @@
           <a href="https://snapchat.com/" target="_blank" rel="noreferrer">Snap</a>
         </div>
       </section>
-
-      <section class="admin-shell hidden" id="admin" aria-labelledby="adminTitle">
-        <div class="admin-login" id="adminGate">
-          <p class="eyebrow">Private access</p>
-          <h2 id="adminTitle">Manage shop</h2>
-          <p class="helper" id="adminGateMessage">Sign in to continue.</p>
-        </div>
-
-        <div class="admin-console hidden" id="adminConsole">
-          <div class="admin-topline">
-            <div>
-              <p class="eyebrow">Staff console</p>
-              <h2>Products, promos and orders</h2>
-            </div>
-            <button id="adminLock" type="button">Lock</button>
-          </div>
-
-          <div class="admin-tabs" role="tablist" aria-label="Admin sections">
-            <button class="active" data-admin-tab="products" type="button">Products</button>
-            <button data-admin-tab="banners" type="button">Banners</button>
-            <button data-admin-tab="orders" type="button">Orders</button>
-            <button data-admin-tab="staff" type="button">Staff</button>
-          </div>
-
-          <div class="admin-panel" data-panel="products">
-            <form id="productForm" class="admin-form">
-              <input type="hidden" id="productId" />
-              <label>Product name <input id="productName" required /></label>
-              <label>Price (GHS) <input id="productPrice" type="number" min="1" required /></label>
-              <label>Section
-                <select id="productSection">
-                  <option value="new-arrivals">New Arrivals</option>
-                  <option value="flash-sale">Flashsale</option>
-                  <option value="trending">Trending</option>
-                </select>
-              </label>
-              <label>Sizes <input id="productSizes" placeholder="S, M, L, XL" /></label>
-              <label>Product image <input id="productImageFile" type="file" accept="image/png,image/jpeg,image/webp" /></label>
-              <label>Image URL <input id="productImage" placeholder="Optional hosted image URL" /></label>
-              <div class="image-preview hidden" id="productImagePreview">
-                <img src="" alt="" />
-              </div>
-              <label>Sort order <input id="productSort" type="number" value="0" /></label>
-              <label>Description <textarea id="productDescription" rows="3"></textarea></label>
-              <label class="check-row"><input id="productActive" type="checkbox" checked /> Active</label>
-              <button type="submit">Save product</button>
-              <button class="ghost-button" id="productReset" type="button">Clear</button>
-            </form>
-            <div class="admin-list" id="adminProductList"></div>
-          </div>
-
-          <div class="admin-panel hidden" data-panel="banners">
-            <form id="bannerForm" class="admin-form compact-form">
-              <input type="hidden" id="bannerId" />
-              <label>Placement
-                <select id="bannerPlacement">
-                  <option value="promo">Promo banner</option>
-                  <option value="notification">Notification</option>
-                </select>
-              </label>
-              <label>Message <input id="bannerText" required /></label>
-              <label class="check-row"><input id="bannerActive" type="checkbox" checked /> Active</label>
-              <button type="submit">Save banner</button>
-              <button class="ghost-button" id="bannerReset" type="button">Clear</button>
-            </form>
-            <div class="admin-list" id="adminBannerList"></div>
-          </div>
-
-          <div class="admin-panel hidden" data-panel="orders">
-            <p class="helper">Review customer orders and update fulfillment progress.</p>
-            <div class="admin-list" id="adminOrderList"></div>
-          </div>
-
-          <div class="admin-panel hidden" data-panel="staff">
-            <form id="staffForm" class="admin-form compact-form">
-              <label>Full name <input id="staffName" autocomplete="name" required /></label>
-              <label>Phone <input id="staffPhone" autocomplete="tel" /></label>
-              <label>Email <input id="staffEmail" type="email" autocomplete="email" required /></label>
-              <label>Temporary password <input id="staffPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-              <label>Access level
-                <select id="staffRole">
-                  <option value="admin">Owner</option>
-                  <option value="staff">Staff</option>
-                </select>
-              </label>
-              <button type="submit">Add account</button>
-            </form>
-            <div class="admin-list" id="adminStaffList"></div>
-          </div>
-          <p class="helper" id="adminMessage"></p>
-        </div>
-      </section>
     </main>
 
-    <div class="modal hidden" id="adminAccessModal" aria-hidden="true" role="dialog" aria-labelledby="adminAccessTitle">
-      <div class="modal-card">
+    <div class="modal hidden" id="authModal" aria-hidden="true" role="dialog" aria-labelledby="authTitle">
+      <div class="modal-card auth-card">
         <div class="modal-topline">
           <div>
-            <p class="eyebrow">Private access</p>
-            <h2 id="adminAccessTitle">Staff login</h2>
+            <p class="eyebrow">Customer access</p>
+            <h2 id="authTitle">Account</h2>
           </div>
-          <button class="ghost-button" id="adminAccessClose" type="button">Close</button>
+          <button class="ghost-button" id="authClose" type="button">Close</button>
         </div>
-        <form id="adminAuthForm" class="admin-form compact-form">
-          <label>Email <input id="adminEmail" type="email" autocomplete="email" required /></label>
-          <label>Password <input id="adminPassword" type="password" autocomplete="current-password" required /></label>
-          <button type="submit">Open console</button>
-          <p class="helper" id="adminAccessMessage"></p>
+        <form id="authForm" class="admin-form compact-form">
+          <label class="auth-create-only">Full name <input id="authName" autocomplete="name" /></label>
+          <label class="auth-create-only">Phone <input id="authPhone" autocomplete="tel" /></label>
+          <label>Email <input id="authEmail" type="email" autocomplete="email" required /></label>
+          <label>Password <input id="authPassword" type="password" autocomplete="current-password" required /></label>
+          <div class="form-actions">
+            <button id="authSignIn" type="submit">Sign in</button>
+            <button class="ghost-button" id="authSignUp" type="button">Create account</button>
+          </div>
+          <p class="helper" id="authMessage"></p>
         </form>
+        <div class="account-card hidden" id="signedIn">
+          <p class="eyebrow">Signed in</p>
+          <h3 id="accountName"></h3>
+          <button class="ghost-button" id="signOut" type="button">Sign out</button>
+        </div>
       </div>
     </div>
 
@@ -235,7 +133,7 @@
       </div>
       <div id="cartItems" class="cart-items"></div>
       <form id="checkoutForm" class="checkout-form">
-        <p class="helper" id="checkoutIdentity">Create an account or sign in before checkout.</p>
+        <p class="helper" id="checkoutIdentity">Sign in before checkout.</p>
         <label>Email <input id="customerEmail" type="email" disabled placeholder="Account email" /></label>
         <label>Full name <input id="customerName" required /></label>
         <label>Phone <input id="customerPhone" required /></label>

@@ -3,7 +3,7 @@ const path = require("path");
 
 const root = process.cwd();
 const dist = path.join(root, "dist");
-const files = ["index.html", "styles.css", "app.js", "config.js"];
+const files = ["index.html", "admin.html", "styles.css", "app.js", "config.js"];
 
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(path.join(dist, "assets"), { recursive: true });

@@ -223,6 +223,39 @@ h3 {
   mix-blend-mode: multiply;
 }
 
+.street-hero {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.72)),
+    radial-gradient(circle at 85% 20%, rgba(215, 255, 72, 0.28), transparent 32%),
+    var(--white);
+}
+
+.hero-poster {
+  min-height: 520px;
+  display: grid;
+  place-items: stretch;
+  background: var(--black);
+  color: var(--white);
+  border: 1px solid var(--black);
+  padding: clamp(14px, 3vw, 28px);
+}
+
+.poster-frame {
+  display: grid;
+  place-items: center;
+  border: 1px solid #333;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0)),
+    #090909;
+}
+
+.poster-frame img {
+  width: min(86%, 620px);
+  object-fit: contain;
+  filter: invert(1);
+  mix-blend-mode: screen;
+}
+
 .promo-strip {
   display: none;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -332,6 +365,29 @@ h3 {
   border-block: 1px solid var(--line);
 }
 
+.story-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  gap: 24px;
+  align-items: start;
+  padding: clamp(42px, 7vw, 96px) clamp(16px, 4vw, 48px);
+  border-top: 1px solid var(--line);
+}
+
+.story-section p:last-child {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+  line-height: 1.55;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: end;
+}
+
 .social-links {
   display: flex;
   flex-wrap: wrap;
@@ -391,6 +447,25 @@ h3 {
 
 .admin-shell {
   background: var(--white);
+}
+
+.admin-page {
+  min-height: 100vh;
+  background: var(--soft);
+  padding: clamp(18px, 4vw, 48px);
+}
+
+.admin-page .admin-console,
+.admin-page .admin-login {
+  background: var(--white);
+}
+
+.admin-logo {
+  width: min(100%, 360px);
+  max-height: 150px;
+  object-fit: contain;
+  object-position: left center;
+  mix-blend-mode: multiply;
 }
 
 .modal {
@@ -630,6 +705,10 @@ textarea {
     min-height: auto;
   }
 
+  .story-section {
+    grid-template-columns: 1fr;
+  }
+
   .hero-media {
     min-height: 280px;
   }
@@ -677,6 +756,10 @@ textarea {
   .secondary-link,
   button {
     width: 100%;
+  }
+
+  .header-actions {
+    grid-column: 2;
   }
 
   .cart-line-controls button {

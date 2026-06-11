@@ -29,6 +29,26 @@ where id = 'USER_ID_FROM_AUTH_USERS';
 
 5. Add real products, banners and notifications through the owner console.
 
+## Auth redirect
+
+In Supabase, update the auth URL settings so verification emails do not point to localhost:
+
+1. Go to `Authentication`.
+2. Open `URL Configuration`.
+3. Set `Site URL` to your live Netlify site, for example:
+
+```text
+https://oswaldcollection.netlify.app
+```
+
+4. Add this to `Redirect URLs`:
+
+```text
+https://oswaldcollection.netlify.app/*
+```
+
+Use your exact live Netlify domain if it is different.
+
 ## Owner accounts
 
 Owner/admin account passwords cannot be viewed later. If someone forgets their password, reset it from Supabase Auth or the login recovery flow.
@@ -36,7 +56,7 @@ Owner/admin account passwords cannot be viewed later. If someone forgets their p
 To add a new owner:
 
 1. Sign in as an existing owner.
-2. Triple tap the logo in the site header.
+2. Triple tap the logo in the shop header or open `/admin.html`.
 3. Open the `Staff` tab.
 4. Enter full name, phone, email and a temporary password.
 5. Set access level to `Owner`.
