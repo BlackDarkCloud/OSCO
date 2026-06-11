@@ -5,7 +5,7 @@ exports.handler = async (event) => {
     return json(405, { error: "Method not allowed" });
   }
 
-  const envError = requireEnv(["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "PAYSTACK_SECRET_KEY"]);
+  const envError = requireEnv(["SUPABASE_SERVICE_ROLE_KEY", "PAYSTACK_SECRET_KEY"]);
   if (envError) return json(500, { error: envError });
 
   const signature = event.headers["x-paystack-signature"] || event.headers["X-Paystack-Signature"];
@@ -35,7 +35,7 @@ function requireEnv(keys) {
 }
 
 async function supabaseRest(path, options = {}) {
-  const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1${path}`, {
+  const response = await fetch(`${supabaseUrl()}/rest/v1${path}`, {
     method: options.method || "GET",
     headers: {
       apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -52,6 +52,10 @@ async function supabaseRest(path, options = {}) {
   }
 
   return response;
+}
+
+function supabaseUrl() {
+  return "https://rwyvfknkafidiowkgath.supabase.co";
 }
 
 function json(statusCode, body) {

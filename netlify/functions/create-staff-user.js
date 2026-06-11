@@ -3,7 +3,7 @@ exports.handler = async (event) => {
     return json(405, { error: "Method not allowed" });
   }
 
-  const envError = requireEnv(["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]);
+  const envError = requireEnv(["SUPABASE_SERVICE_ROLE_KEY"]);
   if (envError) return json(500, { error: envError });
 
   const accessToken = readBearerToken(event.headers.authorization || event.headers.Authorization);
@@ -62,7 +62,7 @@ function readBearerToken(value = "") {
 }
 
 async function getSupabaseUser(accessToken) {
-  const response = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+  const response = await fetch(`${supabaseUrl()}/auth/v1/user`, {
     headers: {
       apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${accessToken}`,
@@ -80,7 +80,7 @@ async function fetchProfile(userId) {
 }
 
 async function createAuthUser({ email, password, fullName, phone }) {
-  const response = await fetch(`${process.env.SUPABASE_URL}/auth/v1/admin/users`, {
+  const response = await fetch(`${supabaseUrl()}/auth/v1/admin/users`, {
     method: "POST",
     headers: {
       apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -114,7 +114,7 @@ async function upsertProfile(profile) {
 }
 
 async function supabaseRest(path, options = {}) {
-  const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1${path}`, {
+  const response = await fetch(`${supabaseUrl()}/rest/v1${path}`, {
     method: options.method || "GET",
     headers: {
       apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -131,6 +131,10 @@ async function supabaseRest(path, options = {}) {
   }
 
   return response;
+}
+
+function supabaseUrl() {
+  return "https://rwyvfknkafidiowkgath.supabase.co";
 }
 
 function json(statusCode, body) {

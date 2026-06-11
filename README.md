@@ -81,7 +81,6 @@ The anon key is safe for the browser. Never place the service role key in `confi
 
 Set these in Netlify:
 
-- `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PAYSTACK_SECRET_KEY`
 - `PAYSTACK_CALLBACK_URL`
