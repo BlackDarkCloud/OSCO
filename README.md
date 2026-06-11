@@ -8,6 +8,7 @@ Professional Netlify storefront for the Ghana clothing brand using Supabase for 
 - Real catalog data from Supabase
 - Customer account required before checkout
 - Admin console controlled by Supabase `profiles.role`
+- Private Staff tab for adding owner/staff accounts
 - Product image upload through Supabase Storage
 - Paystack checkout initialized by a Netlify Function
 - Paystack webhook endpoint for marking successful payments as paid
@@ -27,6 +28,21 @@ where id = 'USER_ID_FROM_AUTH_USERS';
 ```
 
 5. Add real products, banners and notifications through the owner console.
+
+## Owner accounts
+
+Owner/admin account passwords cannot be viewed later. If someone forgets their password, reset it from Supabase Auth or the login recovery flow.
+
+To add a new owner:
+
+1. Sign in as an existing owner.
+2. Triple tap the logo in the site header.
+3. Open the `Staff` tab.
+4. Enter full name, phone, email and a temporary password.
+5. Set access level to `Owner`.
+6. Click `Add account`.
+
+The new owner can then sign in from the private staff login.
 
 ## Database password
 

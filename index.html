@@ -137,6 +137,7 @@
             <button class="active" data-admin-tab="products" type="button">Products</button>
             <button data-admin-tab="banners" type="button">Banners</button>
             <button data-admin-tab="orders" type="button">Orders</button>
+            <button data-admin-tab="staff" type="button">Staff</button>
           </div>
 
           <div class="admin-panel" data-panel="products">
@@ -186,6 +187,23 @@
           <div class="admin-panel hidden" data-panel="orders">
             <p class="helper">Review customer orders and update fulfillment progress.</p>
             <div class="admin-list" id="adminOrderList"></div>
+          </div>
+
+          <div class="admin-panel hidden" data-panel="staff">
+            <form id="staffForm" class="admin-form compact-form">
+              <label>Full name <input id="staffName" autocomplete="name" required /></label>
+              <label>Phone <input id="staffPhone" autocomplete="tel" /></label>
+              <label>Email <input id="staffEmail" type="email" autocomplete="email" required /></label>
+              <label>Temporary password <input id="staffPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+              <label>Access level
+                <select id="staffRole">
+                  <option value="admin">Owner</option>
+                  <option value="staff">Staff</option>
+                </select>
+              </label>
+              <button type="submit">Add account</button>
+            </form>
+            <div class="admin-list" id="adminStaffList"></div>
           </div>
           <p class="helper" id="adminMessage"></p>
         </div>

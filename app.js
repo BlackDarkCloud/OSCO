@@ -17,6 +17,7 @@ let state = {
   products: [],
   banners: [],
   orders: [],
+  staff: [],
   cart: loadCart(),
   adminOpen: false,
   logoTapCount: 0,
@@ -46,7 +47,7 @@ async function init() {
   const { data } = await supabaseClient.auth.getSession();
   state.session = data.session;
   await refreshSessionState();
-  await Promise.all([loadProducts(), loadBanners(), loadOrders()]);
+  await Promise.all([loadProducts(), loadBanners(), loadOrders(), loadStaff()]);
   renderAll();
 
   supabaseClient.auth.onAuthStateChange(async (_event, session) => {
@@ -65,7 +66,7 @@ async function refreshSessionState() {
 
   const { data, error } = await supabaseClient
     .from("profiles")
-    .select("id, full_name, phone, role")
+    .select("id, email, full_name, phone, role")
     .eq("id", state.session.user.id)
     .maybeSingle();
 
@@ -123,6 +124,27 @@ async function loadOrders() {
   }
 
   state.orders = data || [];
+}
+
+async function loadStaff() {
+  if (!state.session) {
+    state.staff = [];
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("id, email, full_name, phone, role")
+    .in("role", ["admin", "staff"])
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.warn(error.message);
+    state.staff = [];
+    return;
+  }
+
+  state.staff = data || [];
 }
 
 function renderAll() {
@@ -412,6 +434,7 @@ function renderAdmin() {
   renderAdminProducts();
   renderAdminBanners();
   renderAdminOrders();
+  renderAdminStaff();
 }
 
 function renderAdminProducts() {
@@ -493,6 +516,62 @@ function renderAdminOrders() {
     `
     )
     .join("");
+}
+
+function renderAdminStaff() {
+  const list = document.querySelector("#adminStaffList");
+  if (!list) return;
+  if (!state.staff.length) {
+    list.innerHTML = `<div class="empty-state">No staff accounts yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = state.staff
+    .map(
+      (person) => `
+      <article class="admin-item">
+        <div class="product-row">
+          <div>
+            <h3>${escapeHtml(person.full_name || "Unnamed account")}</h3>
+            <div class="product-meta">${escapeHtml(person.email || "No email")} | ${escapeHtml(person.phone || "No phone")} | ${escapeHtml(labelForRole(person.role))}</div>
+          </div>
+        </div>
+      </article>
+    `
+    )
+    .join("");
+}
+
+async function saveStaffAccount(event) {
+  event.preventDefault();
+  setAdminMessage("Adding account...");
+  const payload = {
+    full_name: document.querySelector("#staffName").value.trim(),
+    phone: document.querySelector("#staffPhone").value.trim(),
+    email: document.querySelector("#staffEmail").value.trim(),
+    password: document.querySelector("#staffPassword").value,
+    role: document.querySelector("#staffRole").value,
+  };
+
+  const response = await fetch("/api/create-staff-user", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${state.session.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const result = await response.json();
+
+  if (!response.ok) {
+    setAdminMessage(result.error || "Unable to add account.");
+    return;
+  }
+
+  document.querySelector("#staffForm").reset();
+  setAdminMessage("Account added.");
+  await loadStaff();
+  renderAdminStaff();
 }
 
 async function saveProduct(event) {
@@ -701,6 +780,7 @@ function bindEvents() {
   });
   document.querySelector("#bannerForm").addEventListener("submit", saveBanner);
   document.querySelector("#bannerReset").addEventListener("click", resetBannerForm);
+  document.querySelector("#staffForm").addEventListener("submit", saveStaffAccount);
   document.querySelector("#adminLock").addEventListener("click", lockAdmin);
 
   document.addEventListener("click", async (event) => {
@@ -795,7 +875,7 @@ async function adminSignIn(event) {
 
   closeAdminAccess();
   state.adminOpen = true;
-  await Promise.all([loadProducts(), loadBanners(), loadOrders()]);
+  await Promise.all([loadProducts(), loadBanners(), loadOrders(), loadStaff()]);
   renderAll();
   document.querySelector("#admin").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -827,6 +907,10 @@ function labelForSection(section) {
 
 function labelForPlacement(placement) {
   return placement === "notification" ? "Notification" : "Promo banner";
+}
+
+function labelForRole(role) {
+  return role === "admin" ? "Owner" : "Staff";
 }
 
 function escapeHtml(value) {

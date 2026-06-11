@@ -2,12 +2,22 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
+  email text,
   full_name text,
   phone text,
   role text not null default 'customer' check (role in ('customer', 'staff', 'admin')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+add column if not exists email text;
+
+update public.profiles
+set email = auth.users.email
+from auth.users
+where public.profiles.id = auth.users.id
+  and public.profiles.email is null;
 
 create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
@@ -96,9 +106,10 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, phone)
+  insert into public.profiles (id, email, full_name, phone)
   values (
     new.id,
+    new.email,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
     coalesce(new.raw_user_meta_data ->> 'phone', '')
   );
