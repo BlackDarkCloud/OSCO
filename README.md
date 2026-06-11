@@ -1,113 +1,103 @@
-# OSCO Shop
+# OSCO Website
 
-Professional Netlify storefront for the Ghana clothing brand using Supabase for catalog, users, admin roles, banners and orders.
+React/Netlify website for OSCO with a public brand site, shop, gallery/events pages, contact page, customer accounts, Paystack checkout, and a private staff console.
 
-## Current build
+## Structure
 
-- Public shop sections: New Arrivals, Flashsale and Trending
-- Real catalog data from Supabase
-- Customer account required before checkout
-- Admin console controlled by Supabase `profiles.role`
-- Private Staff tab for adding owner/staff accounts
-- Product image upload through Supabase Storage
-- Product-level discounts
-- Promo code creation and checkout application
-- Brand gallery/lookbook management
-- Order fulfillment status updates
-- Paystack checkout initialized by a Netlify Function
-- Paystack webhook endpoint for marking successful payments as paid
-- Email/order update webhook function
+- `/` - brand home page with logo hero, slogan, image shuttle, brand description, featured shop items, events and reviews
+- `/shop` - products grouped into Current Drops, Flashsale and Trending
+- `/gallery` - brand gallery, event announcements and event galleries grouped by event
+- `/contact` - WhatsApp and social links
+- `/admin.html` - private owner/staff console
+
+Triple tap the OSCO logo in the public header to open `/admin.html`.
+
+## Staff console
+
+Owners and staff can manage:
+
+- products, images, active/hidden state, discounts and sections
+- brand gallery images
+- event announcements
+- event gallery images grouped by event
+- customer reviews
+- promo codes
+- promo/notification banners
+- orders and fulfillment status
+- owner/staff accounts
 
 ## Supabase setup
 
-1. Create a Supabase project.
-2. Open the SQL editor and run `supabase-schema.sql`.
-3. Create the first owner account from the site sign-up form.
-4. In Supabase SQL editor, promote that account:
+Open Supabase SQL Editor and run the full `supabase-schema.sql` file after every schema change.
 
-```sql
-update public.profiles
-set role = 'admin'
-where id = 'USER_ID_FROM_AUTH_USERS';
-```
+This creates or updates:
 
-5. Add real products, banners and notifications through the owner console.
+- `products`
+- `gallery_images`
+- `events`
+- `event_gallery_images`
+- `customer_reviews`
+- `promo_codes`
+- `banners`
+- `orders`
+- `order_items`
+- `profiles`
+- storage buckets `product-images` and `gallery-images`
 
-The schema also creates:
+If gallery upload says `Bucket not found`, the latest SQL has not been applied to Supabase yet. Run `supabase-schema.sql`, then refresh the live site and try the upload again.
 
-- `gallery_images` for lookbook/portfolio images
-- `promo_codes` for checkout promo codes
-- product discount fields
-- `gallery-images` and `product-images` storage buckets
-- order discount and fulfillment fields
+If products were added but do not appear, check these:
+
+1. The product is marked `Active`.
+2. The product section is one of `Current Drops`, `Flashsale`, or `Trending`.
+3. The latest `supabase-schema.sql` has been run.
+4. Netlify has deployed the latest GitHub commit.
+
+The React app includes fallback loading for older product rows, but checkout and discounts still need the latest database schema.
+
+## Owner account
+
+Owner/admin passwords cannot be viewed later. To add a new owner:
+
+1. Sign in as an existing owner at `/admin.html`.
+2. Open the `Staff` tab.
+3. Add the new email, phone, name and temporary password.
+4. Set access level to `Owner`.
+5. The new owner signs in at `/admin.html`.
 
 ## Auth redirect
 
-In Supabase, update the auth URL settings so verification emails do not point to localhost:
+In Supabase:
 
 1. Go to `Authentication`.
 2. Open `URL Configuration`.
-3. Set `Site URL` to your live Netlify site, for example:
+3. Set `Site URL` to the live Netlify domain.
+4. Add this redirect URL:
 
 ```text
-https://oswaldcollection.netlify.app
+https://your-netlify-site.netlify.app/*
 ```
 
-4. Add this to `Redirect URLs`:
+Use the exact live domain.
 
-```text
-https://oswaldcollection.netlify.app/*
-```
+## Contact and social links
 
-Use your exact live Netlify domain if it is different.
-
-## Owner accounts
-
-Owner/admin account passwords cannot be viewed later. If someone forgets their password, reset it from Supabase Auth or the login recovery flow.
-
-To add a new owner:
-
-1. Sign in as an existing owner.
-2. Triple tap the logo in the shop header or open `/admin.html`.
-3. Open the `Staff` tab.
-4. Enter full name, phone, email and a temporary password.
-5. Set access level to `Owner`.
-6. Click `Add account`.
-
-The new owner can then sign in from the private staff login.
-
-## Database password
-
-You cannot view the existing database password after setup. If you do not know it, reset it in Supabase:
-
-1. Go to `Project Settings`.
-2. Open `Database`.
-3. Use the database password reset option.
-
-The website does not need this password. The frontend uses the public Supabase URL and anon key, while Netlify Functions use `SUPABASE_SERVICE_ROLE_KEY`.
-
-## Product image upload
-
-The schema creates a public Supabase Storage bucket named:
-
-```text
-product-images
-```
-
-Staff/admin users can upload product images directly from the product form. Customers can view uploaded product images publicly.
-
-## Frontend config
-
-Copy `config.example.js` values into `config.js`:
+Edit `public/config.js`:
 
 ```js
 window.OSCO_CONFIG = {
   supabaseUrl: "https://your-project.supabase.co",
   supabaseAnonKey: "your-public-anon-key",
+  contact: {
+    whatsapp: "https://wa.me/233XXXXXXXXX",
+    instagram: "https://instagram.com/osco",
+    tiktok: "https://tiktok.com/@osco",
+    snapchat: "https://snapchat.com/add/osco",
+  },
 };
 ```
 
-The anon key is safe for the browser. Never place the service role key in `config.js`.
+The Supabase anon key is public. Never put the service role key in `public/config.js`.
 
 ## Netlify environment variables
 
@@ -117,7 +107,9 @@ Set these in Netlify:
 - `PAYSTACK_SECRET_KEY`
 - `PAYSTACK_CALLBACK_URL`
 - `EMAIL_WEBHOOK_URL`
-- `EMAIL_WEBHOOK_TOKEN` if your email provider/webhook needs it
+- `EMAIL_WEBHOOK_TOKEN` if your email provider needs it
+
+Do not set public browser values like `SUPABASE_URL` as Netlify secrets if Netlify keeps flagging them. The public Supabase URL is already in the browser config and is not a private secret.
 
 Paystack webhook URL:
 
@@ -125,14 +117,15 @@ Paystack webhook URL:
 https://your-site.netlify.app/api/paystack-webhook
 ```
 
-## Local preview
+## Local development
 
 ```powershell
-npm start
+npm install
+npm run dev
 ```
 
-Then open:
+Build:
 
-```text
-http://localhost:4173
+```powershell
+npm run build
 ```

@@ -67,6 +67,43 @@ create table if not exists public.gallery_images (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  event_date date,
+  location text,
+  image_url text,
+  active boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.event_gallery_images (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  title text not null,
+  caption text,
+  image_url text not null,
+  active boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.customer_reviews (
+  id uuid primary key default gen_random_uuid(),
+  customer_name text not null,
+  role_or_location text,
+  review text not null,
+  rating integer not null default 5 check (rating >= 1 and rating <= 5),
+  active boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.promo_codes (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
@@ -150,6 +187,21 @@ create trigger gallery_images_touch_updated_at
 before update on public.gallery_images
 for each row execute function public.touch_updated_at();
 
+drop trigger if exists events_touch_updated_at on public.events;
+create trigger events_touch_updated_at
+before update on public.events
+for each row execute function public.touch_updated_at();
+
+drop trigger if exists event_gallery_images_touch_updated_at on public.event_gallery_images;
+create trigger event_gallery_images_touch_updated_at
+before update on public.event_gallery_images
+for each row execute function public.touch_updated_at();
+
+drop trigger if exists customer_reviews_touch_updated_at on public.customer_reviews;
+create trigger customer_reviews_touch_updated_at
+before update on public.customer_reviews
+for each row execute function public.touch_updated_at();
+
 drop trigger if exists promo_codes_touch_updated_at on public.promo_codes;
 create trigger promo_codes_touch_updated_at
 before update on public.promo_codes
@@ -202,6 +254,9 @@ alter table public.profiles enable row level security;
 alter table public.products enable row level security;
 alter table public.banners enable row level security;
 alter table public.gallery_images enable row level security;
+alter table public.events enable row level security;
+alter table public.event_gallery_images enable row level security;
+alter table public.customer_reviews enable row level security;
 alter table public.promo_codes enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
@@ -258,6 +313,45 @@ for all
 using (public.is_shop_admin())
 with check (public.is_shop_admin());
 
+drop policy if exists "public active events" on public.events;
+create policy "public active events"
+on public.events
+for select
+using (active = true or public.is_shop_admin());
+
+drop policy if exists "staff manage events" on public.events;
+create policy "staff manage events"
+on public.events
+for all
+using (public.is_shop_admin())
+with check (public.is_shop_admin());
+
+drop policy if exists "public active event gallery images" on public.event_gallery_images;
+create policy "public active event gallery images"
+on public.event_gallery_images
+for select
+using (active = true or public.is_shop_admin());
+
+drop policy if exists "staff manage event gallery images" on public.event_gallery_images;
+create policy "staff manage event gallery images"
+on public.event_gallery_images
+for all
+using (public.is_shop_admin())
+with check (public.is_shop_admin());
+
+drop policy if exists "public active customer reviews" on public.customer_reviews;
+create policy "public active customer reviews"
+on public.customer_reviews
+for select
+using (active = true or public.is_shop_admin());
+
+drop policy if exists "staff manage customer reviews" on public.customer_reviews;
+create policy "staff manage customer reviews"
+on public.customer_reviews
+for all
+using (public.is_shop_admin())
+with check (public.is_shop_admin());
+
 drop policy if exists "public active promo codes" on public.promo_codes;
 create policy "public active promo codes"
 on public.promo_codes
@@ -307,6 +401,9 @@ with check (public.is_shop_admin());
 create index if not exists products_section_active_idx on public.products(section, active, sort_order);
 create index if not exists banners_placement_active_idx on public.banners(placement, active);
 create index if not exists gallery_images_active_sort_idx on public.gallery_images(active, sort_order);
+create index if not exists events_active_sort_idx on public.events(active, sort_order, event_date);
+create index if not exists event_gallery_images_event_sort_idx on public.event_gallery_images(event_id, active, sort_order);
+create index if not exists customer_reviews_active_sort_idx on public.customer_reviews(active, sort_order);
 create index if not exists promo_codes_code_active_idx on public.promo_codes(code, active);
 create index if not exists orders_user_created_idx on public.orders(user_id, created_at desc);
 create index if not exists order_items_order_idx on public.order_items(order_id);
@@ -393,6 +490,9 @@ grant usage on schema public to anon, authenticated;
 grant select on public.products to anon, authenticated;
 grant select on public.banners to anon, authenticated;
 grant select on public.gallery_images to anon, authenticated;
+grant select on public.events to anon, authenticated;
+grant select on public.event_gallery_images to anon, authenticated;
+grant select on public.customer_reviews to anon, authenticated;
 grant select on public.promo_codes to anon, authenticated;
 grant select, update on public.profiles to authenticated;
 grant select, update on public.orders to authenticated;
@@ -400,5 +500,8 @@ grant select on public.order_items to authenticated;
 grant insert, update, delete on public.products to authenticated;
 grant insert, update, delete on public.banners to authenticated;
 grant insert, update, delete on public.gallery_images to authenticated;
+grant insert, update, delete on public.events to authenticated;
+grant insert, update, delete on public.event_gallery_images to authenticated;
+grant insert, update, delete on public.customer_reviews to authenticated;
 grant insert, update, delete on public.promo_codes to authenticated;
 grant insert, update, delete on public.order_items to authenticated;
