@@ -19,10 +19,10 @@
         <img src="assets/osco-logo-mark.png" alt="" />
       </a>
       <nav class="main-nav" aria-label="Main navigation">
-        <a href="#new-arrivals">New</a>
-        <a href="#flash-sale">Flashsale</a>
-        <a href="#trending">Trending</a>
+        <a href="#drops">Drops</a>
+        <a href="#lookbook">Lookbook</a>
         <a href="#story">Story</a>
+        <a href="#socials">Socials</a>
       </nav>
       <div class="header-actions">
         <button class="ghost-button" id="accountOpen" type="button">Account</button>
@@ -31,58 +31,103 @@
     </header>
 
     <main id="top">
-      <section class="hero street-hero">
+      <section class="brand-hero">
         <div class="hero-copy">
-          <p class="eyebrow">Ghana streetwear</p>
+          <p class="eyebrow">Ghana streetwear / Est. 2022</p>
           <img class="hero-wordmark" src="assets/osco-logo-full.jpeg" alt="OSCO Power From Beyond" />
-          <p class="tagline">Black and white pieces built for Accra nights, daily movement, and the quiet confidence of standing apart.</p>
+          <h1>Built for the ones who move different.</h1>
+          <p class="tagline">
+            OSCO is black-and-white streetwear from Ghana: graphic, disciplined, and made for presence.
+          </p>
           <div class="hero-actions">
-            <a class="primary-link" href="#new-arrivals">Shop the drop</a>
-            <a class="secondary-link" href="#story">Power From Beyond</a>
+            <a class="primary-link" href="#drops">Shop current drop</a>
+            <a class="secondary-link" href="#lookbook">View lookbook</a>
+          </div>
+          <div class="brand-stats" aria-label="Brand highlights">
+            <span>Accra energy</span>
+            <span>Limited runs</span>
+            <span>Power From Beyond</span>
           </div>
         </div>
-        <div class="hero-poster">
-          <div class="poster-frame">
-            <img src="assets/osco-logo-full.jpeg" alt="" />
+
+        <div class="hero-shuttle" aria-label="Featured OSCO product images">
+          <div class="shuttle-image-wrap">
+            <img id="heroShuttleImage" src="assets/osco-logo-full.jpeg" alt="" />
+          </div>
+          <div class="shuttle-footer">
+            <span id="heroShuttleLabel">Current drop</span>
+            <span id="heroShuttleCount">01</span>
           </div>
         </div>
       </section>
 
       <section class="promo-strip" id="promoStrip"></section>
 
-      <section class="shop-section" id="new-arrivals">
+      <section class="editorial-band">
+        <p class="eyebrow">Portfolio / Shop</p>
+        <h2>Clothes, visuals, attitude and archive in one place.</h2>
+        <p>
+          The site works as a storefront for available pieces and a living portfolio for OSCO's identity,
+          shoots, campaign images and future collections.
+        </p>
+      </section>
+
+      <section class="shop-section" id="drops">
         <div class="section-heading">
-          <p class="eyebrow">Fresh stock</p>
-          <h2>New Arrivals</h2>
+          <div>
+            <p class="eyebrow">Available now</p>
+            <h2>Current Drops</h2>
+          </div>
+          <a class="secondary-link" href="#lookbook">Brand gallery</a>
         </div>
         <div class="product-grid" data-section="new-arrivals"></div>
       </section>
 
       <section class="shop-section dark-section" id="flash-sale">
         <div class="section-heading">
-          <p class="eyebrow">Limited pieces</p>
-          <h2>Flashsale</h2>
+          <div>
+            <p class="eyebrow">Price moves</p>
+            <h2>Flashsale</h2>
+          </div>
         </div>
         <div class="product-grid" data-section="flash-sale"></div>
       </section>
 
       <section class="shop-section" id="trending">
         <div class="section-heading">
-          <p class="eyebrow">Most wanted</p>
-          <h2>Trending</h2>
+          <div>
+            <p class="eyebrow">Most wanted</p>
+            <h2>Trending</h2>
+          </div>
         </div>
         <div class="product-grid" data-section="trending"></div>
       </section>
 
+      <section class="lookbook-section" id="lookbook">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Gallery</p>
+            <h2>OSCO in motion</h2>
+          </div>
+          <p class="section-note">Campaigns, product shots and visual moments from the brand world.</p>
+        </div>
+        <div class="lookbook-grid" id="lookbookGrid"></div>
+      </section>
+
       <section class="story-section" id="story">
         <div>
-          <p class="eyebrow">Est. 2022</p>
+          <p class="eyebrow">Brand story</p>
           <h2>Power From Beyond</h2>
         </div>
-        <p>
-          OSCO is a Ghana-based streetwear label shaped by contrast, discipline and presence.
-          The brand keeps the palette sharp so the attitude can speak louder than the noise.
-        </p>
+        <div class="story-copy">
+          <p>
+            OSCO is a Ghana-based streetwear label shaped by contrast, discipline and presence.
+            The palette stays sharp so the cut, confidence and message can carry the weight.
+          </p>
+          <p>
+            Every drop is part shop, part archive: a record of the people, places and energy around the brand.
+          </p>
+        </div>
       </section>
 
       <section class="social-section" id="socials">
@@ -138,7 +183,12 @@
         <label>Full name <input id="customerName" required /></label>
         <label>Phone <input id="customerPhone" required /></label>
         <label>Delivery address <textarea id="customerAddress" rows="3" required></textarea></label>
+        <div class="promo-apply">
+          <label>Promo code <input id="promoCodeInput" placeholder="Enter code" /></label>
+          <button class="ghost-button" id="promoApply" type="button">Apply</button>
+        </div>
         <button id="checkoutButton" type="submit">Checkout with Paystack</button>
+        <p class="helper" id="promoMessage"></p>
         <p class="helper" id="checkoutMessage"></p>
       </form>
     </aside>

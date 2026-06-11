@@ -11,7 +11,7 @@ exports.handler = async (event) => {
 
   try {
     const user = await getSupabaseUser(accessToken);
-    const { customer, items } = JSON.parse(event.body || "{}");
+    const { customer, items, promo_code } = JSON.parse(event.body || "{}");
 
     if (!customer?.name || !customer?.phone || !customer?.address) {
       return json(400, { error: "Name, phone and delivery address are required." });
@@ -34,18 +34,23 @@ exports.handler = async (event) => {
       return {
         product_id: product.id,
         name: product.name,
-        price_ghs: Number(product.price_ghs),
+        price_ghs: productPrice(product),
         quantity,
       };
     });
 
-    const total = orderItems.reduce((sum, item) => sum + item.price_ghs * item.quantity, 0);
+    const subtotal = orderItems.reduce((sum, item) => sum + item.price_ghs * item.quantity, 0);
+    const promo = promo_code ? await fetchPromoCode(promo_code) : null;
+    const discount = promo ? promoDiscount(promo, subtotal) : 0;
+    const total = Math.max(0, subtotal - discount);
     const reference = `OSCO-${Date.now()}-${user.id.slice(0, 8)}`;
     const order = await createOrder({
       user,
       customer,
       reference,
       total,
+      discount,
+      promoCode: promo?.code || null,
     });
     await createOrderItems(order.id, orderItems);
 
@@ -101,11 +106,30 @@ async function getSupabaseUser(accessToken) {
 
 async function fetchProducts(productIds) {
   const params = productIds.map(encodeURIComponent).join(",");
-  const response = await supabaseRest(`/products?select=id,name,price_ghs,active&id=in.(${params})`);
+  const response = await supabaseRest(`/products?select=id,name,price_ghs,active,discount_active,discount_percent&id=in.(${params})`);
   return response.json();
 }
 
-async function createOrder({ user, customer, reference, total }) {
+async function fetchPromoCode(code) {
+  const response = await supabaseRest(`/promo_codes?select=code,discount_type,discount_value,min_order_ghs,active&code=eq.${encodeURIComponent(String(code).toUpperCase())}&active=eq.true`);
+  const rows = await response.json();
+  return rows[0] || null;
+}
+
+function productPrice(product) {
+  const base = Number(product.price_ghs || 0);
+  if (!product.discount_active || Number(product.discount_percent || 0) <= 0) return base;
+  return Math.max(0, base - base * (Math.min(Number(product.discount_percent), 95) / 100));
+}
+
+function promoDiscount(promo, subtotal) {
+  if (Number(promo.min_order_ghs || 0) > subtotal) return 0;
+  const value = Number(promo.discount_value || 0);
+  if (promo.discount_type === "fixed") return Math.min(subtotal, value);
+  return Math.min(subtotal, subtotal * (Math.min(value, 95) / 100));
+}
+
+async function createOrder({ user, customer, reference, total, discount, promoCode }) {
   const response = await supabaseRest("/orders", {
     method: "POST",
     headers: { Prefer: "return=representation" },
@@ -114,6 +138,8 @@ async function createOrder({ user, customer, reference, total }) {
       reference,
       status: "pending_payment",
       total_ghs: total,
+      discount_ghs: discount,
+      promo_code: promoCode,
       customer_name: customer.name,
       customer_email: user.email,
       customer_phone: customer.phone,

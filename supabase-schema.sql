@@ -28,15 +28,51 @@ create table if not exists public.products (
   sizes text[] not null default '{}',
   image_url text,
   active boolean not null default true,
+  discount_active boolean not null default false,
+  discount_percent numeric(5, 2) not null default 0 check (discount_percent >= 0 and discount_percent <= 95),
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
+alter table public.products
+add column if not exists discount_active boolean not null default false;
+
+alter table public.products
+add column if not exists discount_percent numeric(5, 2) not null default 0;
+
+alter table public.products
+drop constraint if exists products_discount_percent_check;
+
+alter table public.products
+add constraint products_discount_percent_check check (discount_percent >= 0 and discount_percent <= 95);
+
 create table if not exists public.banners (
   id uuid primary key default gen_random_uuid(),
   placement text not null check (placement in ('promo', 'notification')),
   body text not null,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.gallery_images (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  caption text,
+  image_url text not null,
+  active boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.promo_codes (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  discount_type text not null default 'percent' check (discount_type in ('percent', 'fixed')),
+  discount_value numeric(12, 2) not null check (discount_value > 0),
+  min_order_ghs numeric(12, 2) not null default 0 check (min_order_ghs >= 0),
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -48,6 +84,8 @@ create table if not exists public.orders (
   reference text not null unique,
   status text not null default 'pending_payment' check (status in ('pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'cancelled')),
   total_ghs numeric(12, 2) not null check (total_ghs >= 0),
+  discount_ghs numeric(12, 2) not null default 0 check (discount_ghs >= 0),
+  promo_code text,
   customer_name text not null,
   customer_email text not null,
   customer_phone text,
@@ -58,6 +96,19 @@ create table if not exists public.orders (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.orders
+add column if not exists discount_ghs numeric(12, 2) not null default 0;
+
+alter table public.orders
+add column if not exists promo_code text;
+
+alter table public.orders
+drop constraint if exists orders_status_check;
+
+alter table public.orders
+add constraint orders_status_check
+check (status in ('pending_payment', 'paid', 'processing', 'shipped', 'fulfilled', 'delivered', 'cancelled'));
 
 create table if not exists public.order_items (
   id uuid primary key default gen_random_uuid(),
@@ -92,6 +143,16 @@ for each row execute function public.touch_updated_at();
 drop trigger if exists banners_touch_updated_at on public.banners;
 create trigger banners_touch_updated_at
 before update on public.banners
+for each row execute function public.touch_updated_at();
+
+drop trigger if exists gallery_images_touch_updated_at on public.gallery_images;
+create trigger gallery_images_touch_updated_at
+before update on public.gallery_images
+for each row execute function public.touch_updated_at();
+
+drop trigger if exists promo_codes_touch_updated_at on public.promo_codes;
+create trigger promo_codes_touch_updated_at
+before update on public.promo_codes
 for each row execute function public.touch_updated_at();
 
 drop trigger if exists orders_touch_updated_at on public.orders;
@@ -140,6 +201,8 @@ $$;
 alter table public.profiles enable row level security;
 alter table public.products enable row level security;
 alter table public.banners enable row level security;
+alter table public.gallery_images enable row level security;
+alter table public.promo_codes enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 
@@ -182,6 +245,32 @@ for all
 using (public.is_shop_admin())
 with check (public.is_shop_admin());
 
+drop policy if exists "public active gallery images" on public.gallery_images;
+create policy "public active gallery images"
+on public.gallery_images
+for select
+using (active = true or public.is_shop_admin());
+
+drop policy if exists "staff manage gallery images" on public.gallery_images;
+create policy "staff manage gallery images"
+on public.gallery_images
+for all
+using (public.is_shop_admin())
+with check (public.is_shop_admin());
+
+drop policy if exists "public active promo codes" on public.promo_codes;
+create policy "public active promo codes"
+on public.promo_codes
+for select
+using (active = true or public.is_shop_admin());
+
+drop policy if exists "staff manage promo codes" on public.promo_codes;
+create policy "staff manage promo codes"
+on public.promo_codes
+for all
+using (public.is_shop_admin())
+with check (public.is_shop_admin());
+
 drop policy if exists "customers read own orders" on public.orders;
 create policy "customers read own orders"
 on public.orders
@@ -217,6 +306,8 @@ with check (public.is_shop_admin());
 
 create index if not exists products_section_active_idx on public.products(section, active, sort_order);
 create index if not exists banners_placement_active_idx on public.banners(placement, active);
+create index if not exists gallery_images_active_sort_idx on public.gallery_images(active, sort_order);
+create index if not exists promo_codes_code_active_idx on public.promo_codes(code, active);
 create index if not exists orders_user_created_idx on public.orders(user_id, created_at desc);
 create index if not exists order_items_order_idx on public.order_items(order_id);
 
@@ -259,12 +350,55 @@ on storage.objects
 for delete
 using (bucket_id = 'product-images' and public.is_shop_admin());
 
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'gallery-images',
+  'gallery-images',
+  true,
+  5242880,
+  array['image/png', 'image/jpeg', 'image/webp']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "public read gallery images" on storage.objects;
+create policy "public read gallery images"
+on storage.objects
+for select
+using (bucket_id = 'gallery-images');
+
+drop policy if exists "staff upload gallery images" on storage.objects;
+create policy "staff upload gallery images"
+on storage.objects
+for insert
+with check (bucket_id = 'gallery-images' and public.is_shop_admin());
+
+drop policy if exists "staff update gallery images" on storage.objects;
+create policy "staff update gallery images"
+on storage.objects
+for update
+using (bucket_id = 'gallery-images' and public.is_shop_admin())
+with check (bucket_id = 'gallery-images' and public.is_shop_admin());
+
+drop policy if exists "staff delete gallery images" on storage.objects;
+create policy "staff delete gallery images"
+on storage.objects
+for delete
+using (bucket_id = 'gallery-images' and public.is_shop_admin());
+
 grant usage on schema public to anon, authenticated;
 grant select on public.products to anon, authenticated;
 grant select on public.banners to anon, authenticated;
+grant select on public.gallery_images to anon, authenticated;
+grant select on public.promo_codes to anon, authenticated;
 grant select, update on public.profiles to authenticated;
 grant select, update on public.orders to authenticated;
 grant select on public.order_items to authenticated;
 grant insert, update, delete on public.products to authenticated;
 grant insert, update, delete on public.banners to authenticated;
+grant insert, update, delete on public.gallery_images to authenticated;
+grant insert, update, delete on public.promo_codes to authenticated;
 grant insert, update, delete on public.order_items to authenticated;

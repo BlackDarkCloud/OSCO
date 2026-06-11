@@ -29,7 +29,7 @@
         <div class="admin-topline">
           <div>
             <p class="eyebrow">Staff console</p>
-            <h2>Products, promos and orders</h2>
+            <h2>Catalog, content, promos and orders</h2>
           </div>
           <div class="form-actions">
             <a class="secondary-link" href="/">Shop</a>
@@ -39,6 +39,8 @@
 
         <div class="admin-tabs" role="tablist" aria-label="Admin sections">
           <button class="active" data-admin-tab="products" type="button">Products</button>
+          <button data-admin-tab="gallery" type="button">Gallery</button>
+          <button data-admin-tab="promos" type="button">Promo Codes</button>
           <button data-admin-tab="banners" type="button">Banners</button>
           <button data-admin-tab="orders" type="button">Orders</button>
           <button data-admin-tab="staff" type="button">Staff</button>
@@ -51,7 +53,7 @@
             <label>Price (GHS) <input id="productPrice" type="number" min="1" required /></label>
             <label>Section
               <select id="productSection">
-                <option value="new-arrivals">New Arrivals</option>
+                <option value="new-arrivals">Current Drops</option>
                 <option value="flash-sale">Flashsale</option>
                 <option value="trending">Trending</option>
               </select>
@@ -60,13 +62,54 @@
             <label>Product image <input id="productImageFile" type="file" accept="image/png,image/jpeg,image/webp" /></label>
             <label>Image URL <input id="productImage" placeholder="Optional hosted image URL" /></label>
             <div class="image-preview hidden" id="productImagePreview"><img src="" alt="" /></div>
-            <label>Sort order <input id="productSort" type="number" value="0" /></label>
+            <div class="form-grid">
+              <label>Discount % <input id="productDiscountPercent" type="number" min="0" max="95" value="0" /></label>
+              <label>Sort order <input id="productSort" type="number" value="0" /></label>
+            </div>
             <label>Description <textarea id="productDescription" rows="3"></textarea></label>
-            <label class="check-row"><input id="productActive" type="checkbox" checked /> Active</label>
+            <div class="check-stack">
+              <label class="check-row"><input id="productActive" type="checkbox" checked /> Active</label>
+              <label class="check-row"><input id="productDiscountActive" type="checkbox" /> Activate discount</label>
+            </div>
             <button type="submit">Save product</button>
             <button class="ghost-button" id="productReset" type="button">Clear</button>
           </form>
           <div class="admin-list" id="adminProductList"></div>
+        </div>
+
+        <div class="admin-panel hidden" data-panel="gallery">
+          <form id="galleryForm" class="admin-form compact-form">
+            <input type="hidden" id="galleryId" />
+            <label>Title <input id="galleryTitle" required /></label>
+            <label>Caption <textarea id="galleryCaption" rows="3"></textarea></label>
+            <label>Gallery image <input id="galleryImageFile" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+            <label>Image URL <input id="galleryImage" placeholder="Optional hosted image URL" /></label>
+            <div class="image-preview hidden" id="galleryImagePreview"><img src="" alt="" /></div>
+            <label>Sort order <input id="gallerySort" type="number" value="0" /></label>
+            <label class="check-row"><input id="galleryActive" type="checkbox" checked /> Active</label>
+            <button type="submit">Save gallery image</button>
+            <button class="ghost-button" id="galleryReset" type="button">Clear</button>
+          </form>
+          <div class="admin-list" id="adminGalleryList"></div>
+        </div>
+
+        <div class="admin-panel hidden" data-panel="promos">
+          <form id="promoForm" class="admin-form compact-form">
+            <input type="hidden" id="promoId" />
+            <label>Code <input id="promoCode" placeholder="OSCO10" required /></label>
+            <label>Discount type
+              <select id="promoType">
+                <option value="percent">Percent</option>
+                <option value="fixed">Fixed amount</option>
+              </select>
+            </label>
+            <label>Value <input id="promoValue" type="number" min="1" required /></label>
+            <label>Minimum order (GHS) <input id="promoMinOrder" type="number" min="0" value="0" /></label>
+            <label class="check-row"><input id="promoActive" type="checkbox" checked /> Active</label>
+            <button type="submit">Save promo code</button>
+            <button class="ghost-button" id="promoReset" type="button">Clear</button>
+          </form>
+          <div class="admin-list" id="adminPromoList"></div>
         </div>
 
         <div class="admin-panel hidden" data-panel="banners">
@@ -87,7 +130,7 @@
         </div>
 
         <div class="admin-panel hidden" data-panel="orders">
-          <p class="helper">Review customer orders and update fulfillment progress.</p>
+          <p class="helper">Review paid orders, update fulfillment, and keep customers informed.</p>
           <div class="admin-list" id="adminOrderList"></div>
         </div>
 

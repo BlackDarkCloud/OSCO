@@ -10,6 +10,10 @@ Professional Netlify storefront for the Ghana clothing brand using Supabase for 
 - Admin console controlled by Supabase `profiles.role`
 - Private Staff tab for adding owner/staff accounts
 - Product image upload through Supabase Storage
+- Product-level discounts
+- Promo code creation and checkout application
+- Brand gallery/lookbook management
+- Order fulfillment status updates
 - Paystack checkout initialized by a Netlify Function
 - Paystack webhook endpoint for marking successful payments as paid
 - Email/order update webhook function
@@ -28,6 +32,14 @@ where id = 'USER_ID_FROM_AUTH_USERS';
 ```
 
 5. Add real products, banners and notifications through the owner console.
+
+The schema also creates:
+
+- `gallery_images` for lookbook/portfolio images
+- `promo_codes` for checkout promo codes
+- product discount fields
+- `gallery-images` and `product-images` storage buckets
+- order discount and fulfillment fields
 
 ## Auth redirect
 
