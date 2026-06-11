@@ -1,0 +1,10 @@
+dist/
+osco-netlify-site.zip
+.npm-cache/
+node_modules/
+.netlify/
+.osco-git/
+
+# Keep local OS/editor noise out of the repo.
+.DS_Store
+Thumbs.db

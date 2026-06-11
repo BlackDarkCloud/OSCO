@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "build": "node build-osco.js",
+    "start": "node preview-server.js"
+  }
+}
